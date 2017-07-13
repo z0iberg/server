@@ -44,6 +44,9 @@
 	<settings>
 		<admin>OCA\DAV\Settings\CalDAVSettings</admin>
 	</settings>
+	<background-jobs>
+		<job>OCA\DAV\CalDAV\Reminder\ReminderJob</job>
+	</background-jobs>
 
 	<activity>
 		<settings>
