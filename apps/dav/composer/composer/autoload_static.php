@@ -87,6 +87,8 @@ class ComposerStaticInitDAV
         'OCA\\DAV\\Command\\CreateAddressBook' => __DIR__ . '/..' . '/../lib/Command/CreateAddressBook.php',
         'OCA\\DAV\\Command\\CreateCalendar' => __DIR__ . '/..' . '/../lib/Command/CreateCalendar.php',
         'OCA\\DAV\\Command\\RemoveInvalidShares' => __DIR__ . '/..' . '/../lib/Command/RemoveInvalidShares.php',
+        'OCA\\DAV\\Command\\ListCalendars' => __DIR__ . '/..' . '/../lib/Command/ListCalendars.php',
+        'OCA\\DAV\\Command\\MoveCalendar' => __DIR__ . '/..' . '/../lib/Command/MoveCalendar.php',
         'OCA\\DAV\\Command\\SyncBirthdayCalendar' => __DIR__ . '/..' . '/../lib/Command/SyncBirthdayCalendar.php',
         'OCA\\DAV\\Command\\SyncSystemAddressBook' => __DIR__ . '/..' . '/../lib/Command/SyncSystemAddressBook.php',
         'OCA\\DAV\\Comments\\CommentNode' => __DIR__ . '/..' . '/../lib/Comments/CommentNode.php',
