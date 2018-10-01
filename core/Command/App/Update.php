@@ -82,7 +82,7 @@ class Update extends Command {
 				return 1;
 			}
 
-		} else if ($input->getOption('all')) {
+		} else if ($input->getOption('all') || $input->getOption('showonly')) {
 			$apps = \OC_App::getAllApps();
 		} else {
 			$output->writeln("<error>Please specify an app to update or \"--all\" to update all updatable apps\"</error>");
