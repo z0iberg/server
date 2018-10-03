@@ -391,7 +391,6 @@ class ShareController extends AuthPublicShareController {
 		\OCP\Util::addScript('files', 'file-upload');
 		\OCP\Util::addStyle('files_sharing', 'publicView');
 		\OCP\Util::addScript('files_sharing', 'public');
-		\OCP\Util::addScript('files_sharing', 'public_note');
 		\OCP\Util::addScript('files', 'fileactions');
 		\OCP\Util::addScript('files', 'fileactionsmenu');
 		\OCP\Util::addScript('files', 'jquery.fileupload');
@@ -431,6 +430,7 @@ class ShareController extends AuthPublicShareController {
 		$isNoneFileDropFolder = $shareIsFolder === false || $share->getPermissions() !== \OCP\Constants::PERMISSION_CREATE;
 
 		if ($isNoneFileDropFolder) {
+			\OCP\Util::addScript('files_sharing', 'public_note');
 			$response->setHeaderActions([
 				new SimpleMenuAction('download', $this->l10n->t('Download'), 'icon-download-white', $shareTmpl['downloadURL'], 0),
 				new SimpleMenuAction('download', $this->l10n->t('Download'), 'icon-download', $shareTmpl['downloadURL'], 10, $shareTmpl['fileSize']),
