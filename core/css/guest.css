@@ -33,30 +33,39 @@ body {
 }
 
 /* Various fonts settings */
-p.info a,
+#body-login a {
+	color: #fff;
+	font-weight: 600;
+}
+#body-login a:not(.button):hover,
+#body-login a:not(.button):focus {
+	text-decoration: underline;
+	text-decoration-skip-ink: auto;
+}
+
 #showAdvanced {
 	color: #fff;
 }
-#remember_login:hover+label,
-#forgot-password:hover,
-p.info a:hover {
-	opacity: .6;
-}
+
 em {
 	font-style: normal;
 	opacity: .5;
 }
 
 /* heading styles */
+h2,
+h3,
+h4 {
+	font-weight: 600;
+}
+
 h2 {
 	font-size: 20px;
-	font-weight: 300;
 	margin-bottom: 12px;
 	line-height: 140%;
 }
 h3 {
 	font-size: 15px;
-	font-weight: 300;
 	margin: 12px 0;
 }
 
@@ -77,6 +86,8 @@ body {
 	min-height: 128px;
 	max-height: 200px;
 	margin: 0 auto;
+	position: relative;
+	left: unset;
 }
 
 #header .logo img {
@@ -167,7 +178,8 @@ input, textarea, select, button, div[contenteditable=true] {
 	font-family: 'Open Sans', Frutiger, Calibri, 'Myriad Pro', Myriad, sans-serif;
 }
 input,
-input:not([type='range']) {
+input:not([type='range']),
+a.button {
 	font-size: 20px;
 	margin: 5px;
 	padding: 11px 10px 9px;
@@ -178,11 +190,13 @@ input:not([type='range']) {
 input[type='submit'],
 input[type='submit'].icon-confirm,
 input[type='button'],
-button, .button,
+button,
+.button,
 select {
+	display: inline-block;
 	width: auto;
 	min-width: 25px;
-	padding: 5px;
+	padding: 12px;
 	background-color: white;
 	font-weight: 600;
 	color: #555;
@@ -225,11 +239,22 @@ input.update-continue {
 .updateAnyways a.updateAnywaysButton:hover {
 	color: #222 !important;
 }
+
 input.primary,
-button.primary {
+button.primary,
+a.primary {
 	border: 1px solid #fff;
 	background-color: #0082c9;
 	color: #fff;
+}
+
+input.primary:not(:disabled):hover,
+input.primary:not(:disabled):focus,
+button.primary:not(:disabled):hover,
+button.primary:not(:disabled):focus,
+a.primary:not(:disabled):hover,
+a.primary:not(:disabled):focus{
+	background-color: #17adff;
 }
 
 /* Checkboxes - white only for login */
@@ -298,7 +323,7 @@ label.infield {
 	left: 5px;
 	top: -20px;
 	width: 269px;
-	border-radius: 0 0 2px 2px;
+	border-radius: 0 0 3px 3px;
 	overflow: hidden;
 	height: 3px;
 }
@@ -370,33 +395,56 @@ form .warning input[type='checkbox']+label {
 	color: #fff !important;
 }
 
-/* TOTP */
-.two-factor-header {
-	text-align: center;
-}
 .two-factor-provider {
-	text-align: center;
-	width: 258px !important;
-	display: inline-block;
-	margin-bottom: 0 !important;
-	background-color: rgba(0, 0, 0, 0.3) !important;
-	border: none !important;
-}
-.two-factor-link {
-	display: inline-block;
-	color: rgba(255, 255, 255, 0.75);
-	width: 100%;
-}
-.two-factor-link .button {
-	padding: 10px;
+	display: flex;
 	border-radius: 3px;
-	color: #555 !important;
-	display: inline-block;
-	margin: 5px 0;
-	text-align: center;
-	width: 100%;
-	box-sizing: border-box
+	margin: 12px 0;
+	border: 1px solid transparent;
+	text-align: left;
+	align-items: center;
+	text-decoration: none !important;
 }
+.two-factor-provider:hover,
+.two-factor-provider:focus,
+.two-factor-provider:active {
+	border: 1px solid #fff;
+}
+.two-factor-provider img {
+	width: 64px;
+	height: 64px;
+	padding: 0 12px;
+}
+.two-factor-provider div {
+	margin: 12px 0;
+}
+.two-factor-provider h3 {
+	margin: 0;
+}
+.two-factor-provider p {
+	font-weight: 300;
+}
+.two-factor-icon {
+	width: 100px;
+	display: block;
+	margin: 0 auto;
+}
+.two-factor-submit {
+	width: 100%;
+	padding: 10px;
+	margin: 0 0 5px 0;
+	border-radius: 3px;
+	font-size: 20px;
+}
+.two-factor-primary {
+	/* Fix for 'Use backup codes' button not taking correct styles */
+	padding: 14px !important;
+	width: 226px;
+}
+.two-factor-secondary {
+	display: inline-block;
+	padding: 12px;
+}
+
 
 /* Additional login options */
 #remember_login {
@@ -413,9 +461,11 @@ form .warning input[type='checkbox']+label {
 .lost-password-container #lost-password,
 .lost-password-container #lost-password-back {
 	display: inline-block;
+	font-weight: 300;
 	padding: 12px;
 	margin-top: -6px;
 	color: #fff;
+	cursor: pointer;
 }
 #forgot-password {
 	padding: 11px;
@@ -514,30 +564,42 @@ form #selectDbType label.ui-state-active {
 
 /* Errors */
 /* Warnings and errors are the same */
+.body-login-container,
 .warning,
 .update,
 .error {
 	display: block;
-	padding: 10px;
+	margin-top: 15px;
+	padding: 15px;
 	background-color: rgba(0,0,0,.3);
 	color: #fff;
 	text-align: left;
 	word-wrap: break-word;
-	border-radius: 3px;
+	border-radius: 10px;
 	cursor: default;
 	-moz-user-select: text;
 	-webkit-user-select: text;
 	-ms-user-select: text;
 	user-select: text;
 }
-.warning {
-	margin-top: 15px;
-}
+
+.body-login-container h2,
 .warning h2,
 .update h2,
 .error h2 {
 	text-align: center;
 }
+
+/* TODO: Change all .warning/.update/.error to .body-login-container */
+.body-login-container .icon-big {
+	background-size: 70px;
+	height: 70px;
+}
+
+.body-login-container form {
+	width: initial;
+}
+
 .warning.updateAnyways {
 	text-align: center;
 }
@@ -583,7 +645,10 @@ fieldset.update legend + p {
 
 /* Various paragraph styles */
 .infogroup {
-	margin-bottom: 15px;
+	margin: 8px 0;
+}
+.infogroup:last-child {
+	margin-bottom: 0;
 }
 p.info {
 	margin: 20px auto;
@@ -607,13 +672,6 @@ p.info {
 }
 .update img.float-spinner {
 	float: left;
-}
-.update h2 {
-	margin: 0 0 20px;
-}
-.update a {
-	color: #fff;
-	border-bottom: 1px solid #aaa;
 }
 .update a.update-show-detailed {
 	border-bottom: inherit;
@@ -744,7 +802,7 @@ footer {
 	margin-top: auto;
 }
 
-footer .info a {
+footer .info .entity-name {
 	font-weight: 600;
 }
 

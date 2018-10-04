@@ -342,6 +342,14 @@
 
 			this.$fileList.on('click','td.filename>a.name, td.filesize, td.date', _.bind(this._onClickFile, this));
 
+			$.event.trigger({type: "droppedOnTrash"});
+
+			var self=this;
+			this.$fileList.on("droppedOnTrash", function (event, filename, directory) {
+				//self.fileActions.triggerAction('Favorite', self.getModelForFile(file), self);
+				self.do_delete(filename, directory)
+			});
+
 			this.$fileList.on('change', 'td.selection>.selectCheckBox', _.bind(this._onClickFileCheckbox, this));
 			this.$el.on('show', _.bind(this._onShow, this));
 			this.$el.on('urlChanged', _.bind(this._onUrlChanged, this));
@@ -849,7 +857,7 @@
 			};
 
 			var actions = this.isSelectedMovable() ? OC.dialogs.FILEPICKER_TYPE_COPY_MOVE : OC.dialogs.FILEPICKER_TYPE_COPY;
-			OC.dialogs.filepicker(t('files', 'Target folder'), function(targetPath, type) {
+			OC.dialogs.filepicker(t('files', 'Choose target folder'), function(targetPath, type) {
 				self.fileMultiSelectMenu.toggleLoading('copyMove', true);
 				if (type === OC.dialogs.FILEPICKER_TYPE_COPY) {
 					self.copy(files, targetPath, disableLoadingState);

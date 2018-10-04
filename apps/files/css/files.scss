@@ -49,11 +49,7 @@
 #filestable {
 	position: relative;
 	width: 100%;
-	min-width: 500px;
-}
-
-#filestable tbody tr {
-	height: 51px;
+	min-width: 250px;
 }
 
 /* fit app list view heights */
@@ -63,6 +59,9 @@
 
 .app-files #app-content {
 	transition: background-color 0.3s ease;
+	// force  the width to be the full width to not go bigger than the screen
+	// flex will grow for the mobile view if necessary
+	width: calc(100% - 300px);
 }
 
 .file-drag, .file-drag #filestable tbody tr, .file-drag #filestable tbody tr:hover {
@@ -106,6 +105,9 @@
 .nav-icon-trashbin {
 	@include icon-color('delete', 'files', $color-black);
 }
+.nav-icon-trashbin-starred {
+	@include icon-color('delete', 'files', #ff0000);
+}
 .nav-icon-deletedshares {
 	@include icon-color('unshare', 'files', $color-black);
 }
@@ -132,7 +134,7 @@
 
 #filestable tbody tr {
 	transition: background-color 0.3s ease;
-	height: 40px;
+	height: 51px;
 }
 #filestable tbody tr:hover,
 #filestable tbody tr:focus,
@@ -612,12 +614,15 @@ table tr.summary td {
 
 table.dragshadow {
 	width:auto;
-	z-index: 100;
+	z-index: 2000;
 }
 table.dragshadow td.filename {
 	padding-left:60px;
 	padding-right:16px;
 	height: 36px;
+
+	/* Override "max-width: 0" to prevent file name and size from overlapping */
+	max-width: unset;
 }
 table.dragshadow td.size {
 	padding-right:8px;
