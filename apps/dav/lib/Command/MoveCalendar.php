@@ -106,24 +106,24 @@ class MoveCalendar extends Command {
 
 		$principalBackend = new Principal(
 			$this->userManager,
-			$this->groupManager
+			$this->groupManager,
+			\OC::$server->getShareManager(),
+			\OC::$server->getUserSession(),
+			\OC::$server->getConfig()
 		);
 		$random = \OC::$server->getSecureRandom();
+		$logger = \OC::$server->getLogger();
 		$dispatcher = \OC::$server->getEventDispatcher();
 
 		$name = $input->getArgument('name');
-		$this->caldav = new CalDavBackend($this->dbConnection, $principalBackend, $this->userManager, $random, $dispatcher);
+		$this->caldav = new CalDavBackend($this->dbConnection, $principalBackend,
+			$this->userManager, $this->groupManager, $random, $logger,
+			$dispatcher);
 
 		$calendar = $this->caldav->getCalendarByUri(self::URI_USERS . $userOrigin, $name);
 
 		if (null === $calendar) {
-			/**  If we got no matching calendar with URI, let's try the display names */
-			$suggestedUris = $this->caldav->findCalendarsUrisByDisplayName($name, self::URI_USERS . $userOrigin);
-			if (count($suggestedUris) > 0) {
-				$this->io->note('No calendar with this URI was found, but you may want to try with these?');
-				$this->io->listing($suggestedUris);
-			}
-			throw new \InvalidArgumentException("User <$userOrigin> has no calendar named <$name>.");
+			throw new \InvalidArgumentException("User <$userOrigin> has no calendar named <$name>. You can run occ dav:list-calendars to list calendars URIs for this user.");
 		}
 
 		if (null !== $this->caldav->getCalendarByUri(self::URI_USERS . $userDestination, $name)) {
