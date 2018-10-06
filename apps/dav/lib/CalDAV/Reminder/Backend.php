@@ -89,7 +89,6 @@ class Backend {
 		$object = $this->getObjectNameAndType($objectData);
 
 		$users = $this->getUsersForShares($shares);
-		$users[] = $owner;
 
 		$this->cleanRemindersForEvent($objectData['calendarid'], $objectData['uri']);
 
@@ -105,11 +104,11 @@ class Backend {
 						$query = $this->db->getQueryBuilder();
 						$query->insert('calendar_reminders')
 							->values([
-								'user' => $query->createNamedParameter($user),
+								'uid' => $query->createNamedParameter($user),
 								'calendarid' => $query->createNamedParameter($objectData['calendarid']),
 								'objecturi' => $query->createNamedParameter($objectData['uri']),
 								'type' => $query->createNamedParameter($type),
-								'notificationDate' => $query->createNamedParameter($time->getTimestamp()),
+								'notificationdate' => $query->createNamedParameter($time->getTimestamp()),
 							])->execute();
 					}
 				}
@@ -216,7 +215,7 @@ class Backend {
 	public function getReminders()
 	{
 		$query = $this->db->getQueryBuilder();
-		$fields = ['id', 'calendarid', 'objecturi', 'type', 'notificationDate', 'user'];
+		$fields = ['id', 'calendarid', 'objecturi', 'type', 'notificationdate', 'uid'];
 		$result = $query->select($fields)
 			->from('calendar_reminders')
 			->execute();
@@ -225,11 +224,11 @@ class Backend {
 		while($row = $result->fetch(\PDO::FETCH_ASSOC)) {
 			$reminder = [
 				'id' => $row['id'],
-				'user' => $row['user'],
+				'uid' => $row['uid'],
 				'calendarId' => $row['calendarid'],
 				'objecturi' => $row['objecturi'],
 				'type' => $row['type'],
-				'notificationDate' => $row['notificationDate']
+				'notificationdate' => $row['notificationdate']
 			];
 
 			$reminder['event'] = $this->getCalendarObject($reminder['calendarId'], $reminder['objecturi']);

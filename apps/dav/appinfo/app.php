@@ -78,3 +78,5 @@ $calendarManager->register(function() use ($calendarManager, $app) {
 		$app->setupCalendarProvider($calendarManager, $user->getUID());
 	}
 });
+
+$app->registerNotifier();

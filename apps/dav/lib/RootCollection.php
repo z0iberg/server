@@ -78,14 +78,14 @@ class RootCollection extends SimpleCollection {
 
 		$filesCollection = new Files\RootCollection($userPrincipalBackend, 'principals/users');
 		$filesCollection->disableListing = $disableListing;
-		$caldavBackend = new CalDavBackend($db, $userPrincipalBackend, $userManager, $groupManager, $random, $logger, $dispatcher);
+		$caldavBackend = new CalDavBackend($db, $userPrincipalBackend, $userManager, $groupManager, $config, $random, $logger, $dispatcher);
 		$userCalendarRoot = new CalendarRoot($userPrincipalBackend, $caldavBackend, 'principals/users');
 		$userCalendarRoot->disableListing = $disableListing;
 
-		$resourceCalendarCaldavBackend = new CalDavBackend($db, $userPrincipalBackend, $userManager, $groupManager, $random, $logger, $dispatcher);
+		$resourceCalendarCaldavBackend = new CalDavBackend($db, $userPrincipalBackend, $userManager, $groupManager, $config, $random, $logger, $dispatcher);
 		$resourceCalendarRoot = new CalendarRoot($calendarResourcePrincipalBackend, $caldavBackend, 'principals/calendar-resources');
 		$resourceCalendarRoot->disableListing = $disableListing;
-		$roomCalendarCaldavBackend = new CalDavBackend($db, $userPrincipalBackend, $userManager, $groupManager, $random, $logger, $dispatcher);
+		$roomCalendarCaldavBackend = new CalDavBackend($db, $userPrincipalBackend, $userManager, $groupManager, $config, $random, $logger, $dispatcher);
 		$roomCalendarRoot = new CalendarRoot($calendarRoomPrincipalBackend, $roomCalendarCaldavBackend, 'principals/calendar-rooms');
 		$roomCalendarRoot->disableListing = $disableListing;
 

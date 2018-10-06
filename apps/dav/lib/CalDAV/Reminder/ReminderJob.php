@@ -19,6 +19,7 @@
  */
 namespace OCA\DAV\CalDAV\Reminder;
 
+use OCA\DAV\AppInfo\Application;
 use OC\BackgroundJob\TimedJob;
 use OCP\IL10N;
 use OCP\IUser;
@@ -75,15 +76,15 @@ class ReminderJob extends TimedJob {
 		$reminders = $this->backend->getReminders();
 
 		foreach ($reminders as $reminder) {
-			if ($reminder['notificationDate'] < new \DateTime()) {
+			if ($reminder['notificationdate'] < new \DateTime()) {
 				$reminder['eventData'] = Reader::read($reminder['event']['calendardata']);
 
 				$reminderDetails = $this->getDetails($reminder);
 
 				if ($reminder['type'] === 'EMAIL') {
-					$this->sendMail($this->usermanager->get($reminder['user']), $reminderDetails);
+					$this->sendMail($this->usermanager->get($reminder['uid']), $reminderDetails);
 				} elseif ($reminder['type'] === 'DISPLAY') {
-					$this->sendNotification($this->usermanager->get($reminder['user']), $reminderDetails);
+					$this->sendNotification($this->usermanager->get($reminder['uid']), $reminderDetails);
 				}
 				$this->backend->removeReminder($reminder['id']);
 			}
@@ -118,14 +119,14 @@ class ReminderJob extends TimedJob {
 
 
 		return [
-			'title' => $component->SUMMARY,
+			'title' => (string) $component->SUMMARY,
 			'start' => $component->DTSTART->getDateTime(),
 			'location' => $component->LOCATION,
 			'geo' => $geo,
 			'description' => $component->DESCRIPTION,
 			'calendarName' => $reminder['calendar']['{DAV:}displayname'],
 			'participants' => $component->ATTENDEE,
-			'notificationDate' => $reminder['notificationDate'],
+			'notificationdate' => $reminder['notificationdate'],
 			'uri' => $reminder['objecturi'],
 		];
 	}
@@ -174,12 +175,12 @@ class ReminderJob extends TimedJob {
 	private function sendNotification(IUser $user, $reminder) {
 		/** @var INotification $notification */
 		$notification = $this->notifications->createNotification();
-		$notification->setApp('dav')
+		$notification->setApp(Application::APP_ID)
 			->setUser($user->getUID())
-			//->setDateTime(\DateTime::createFromFormat('U', $reminder['notificationDate']))
+			//->setDateTime(\DateTime::createFromFormat('U', $reminder['notificationdate']))
 			->setDateTime(new \DateTime())
-			->setObject('calendar_reminder', $reminder['uri']) // $type and $id
-			->setSubject('calendar_reminder', [$reminder['title'], $reminder['start']]) // $subject and $parameters
+			->setObject(Application::APP_ID, $reminder['uri']) // $type and $id
+			->setSubject('calendar_reminder', [$reminder['title'], $reminder['start']->getTimeStamp()]) // $subject and $parameters
 			->setMessage('calendar_reminder', ['hurry up !'])
 		;
 		$this->notifications->notify($notification);

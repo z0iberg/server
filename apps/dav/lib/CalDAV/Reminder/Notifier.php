@@ -20,7 +20,7 @@
 
 namespace OCA\DAV\CalDAV\Reminder;
 
-
+use OCA\DAV\AppInfo\Application;
 use OCP\L10N\IFactory;
 use OCP\Notification\INotification;
 use OCP\Notification\INotifier;
@@ -38,7 +38,7 @@ class Notifier implements INotifier {
 	 * @return INotification
 	 */
 	public function prepare(INotification $notification, $languageCode) {
-		if ($notification->getApp() !== 'dav') {
+		if ($notification->getApp() !== Application::APP_ID) {
 			throw new \InvalidArgumentException();
 		}
 
@@ -47,12 +47,18 @@ class Notifier implements INotifier {
 
 		if ($notification->getSubject() === 'calendar_reminder') {
 			$subjectParams = $notification->getSubjectParameters();
-			$notification->setParsedSubject((string)$l->t('Your event "%s" is in %s', [$subjectParams[0], date_format($subjectParams[1], 'Y-m-d H:i:s')]));
-			$notification->setParsedMessage($notification->getMessageParameters()[0]);
+			$event_datetime = new \DateTime();
+			$event_datetime->setTimestamp($subjectParams[1]);
+			$notification->setParsedSubject($l->t('Your event "%s" is in %s', [$subjectParams[0], $event_datetime->format('Y-m-d H:i:s')]));
+			$messageParams = $notification->getMessageParameters();
+			if (isset($messageParams[0]) && $messageParams[0] !== '') {
+				$notification->setParsedMessage($messageParams[0]);
+			}
+			// $notification->setIcon($this->urlGenerator->getAbsoluteURL($this->urlGenerator->imagePath(Application::APP_ID, 'app-dark.svg')));
+			return $notification;
 		} else {
 			// Unknown subject => Unknown notification => throw
 			throw new \InvalidArgumentException();
 		}
-		return $notification;
 	}
 }
