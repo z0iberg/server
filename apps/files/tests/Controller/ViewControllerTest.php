@@ -140,6 +140,7 @@ class ViewControllerTest extends TestCase {
 
 		$nav = new Template('files', 'appnavigation');
 		$nav->assign('usage_relative', 123);
+		$nav->assign('usage_relative_unprecise',  round(123, 1));
 		$nav->assign('usage', '123 B');
 		$nav->assign('quota', 100);
 		$nav->assign('total_space', '100 B');
