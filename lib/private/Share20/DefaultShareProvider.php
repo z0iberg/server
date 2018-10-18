@@ -296,6 +296,7 @@ class DefaultShareProvider implements IShareProvider {
 				->set('token', $qb->createNamedParameter($share->getToken()))
 				->set('expiration', $qb->createNamedParameter($share->getExpirationDate(), IQueryBuilder::PARAM_DATE))
 				->set('note', $qb->createNamedParameter($share->getNote()))
+				->set('hide_download', $qb->createNamedParameter($share->getHideDownload()), IQueryBuilder::PARAM_BOOL)
 				->execute();
 		}
 
@@ -953,6 +954,7 @@ class DefaultShareProvider implements IShareProvider {
 		}
 
 		$share->setProviderId($this->identifier());
+		$share->setHideDownload($data['hide_download']);
 
 		return $share;
 	}
