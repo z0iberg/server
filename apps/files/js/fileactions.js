@@ -64,7 +64,7 @@
 		 * Removes an event handler
 		 *
 		 * @param {String} eventName event name
-		 * @param Function callback
+		 * @param {Function} callback
 		 */
 		off: function(eventName, callback) {
 			this.$el.off(eventName, callback);
@@ -371,6 +371,7 @@
 			}, false, context);
 
 			$el.addClass('permanent');
+
 		},
 
 		/**
@@ -647,6 +648,10 @@
 					if (permissions & OC.PERMISSION_UPDATE) {
 						actions = OC.dialogs.FILEPICKER_TYPE_COPY_MOVE;
 					}
+					var dialogDir = context.dir;
+					if (typeof context.fileList.dirInfo.dirLastCopiedTo !== 'undefined') {
+						dialogDir = context.fileList.dirInfo.dirLastCopiedTo;
+					}
 					OC.dialogs.filepicker(t('files', 'Choose target folder'), function(targetPath, type) {
 						if (type === OC.dialogs.FILEPICKER_TYPE_COPY) {
 							context.fileList.copy(filename, targetPath, false, context.dir);
@@ -654,20 +659,36 @@
 						if (type === OC.dialogs.FILEPICKER_TYPE_MOVE) {
 							context.fileList.move(filename, targetPath, false, context.dir);
 						}
-					}, false, "httpd/unix-directory", true, actions);
+						context.fileList.dirInfo.dirLastCopiedTo = targetPath; 
+					}, false, "httpd/unix-directory", true, actions, dialogDir);
 				}
 			});
 
-			this.register('dir', 'Open', OC.PERMISSION_READ, '', function (filename, context) {
-				var dir = context.$file.attr('data-path') || context.fileList.getCurrentDirectory();
-				context.fileList.changeDirectory(OC.joinPaths(dir, filename), true, false, parseInt(context.$file.attr('data-id'), 10));
+			this.registerAction({
+				name: 'Open',
+				mime: 'dir',
+				permissions: OC.PERMISSION_READ,
+				icon: '',
+				actionHandler: function (filename, context) {
+					var dir = context.$file.attr('data-path') || context.fileList.getCurrentDirectory();
+					if (OCA.Files.App && OCA.Files.App.getActiveView() !== 'files') {
+						OCA.Files.App.setActiveView('files', {silent: true});
+						OCA.Files.App.fileList.changeDirectory(OC.joinPaths(dir, filename), true, true);
+					} else {
+						context.fileList.changeDirectory(OC.joinPaths(dir, filename), true, false, parseInt(context.$file.attr('data-id'), 10));
+					}
+				},
+				displayName: t('files', 'Open')
 			});
 
 			this.registerAction({
 				name: 'Delete',
 				displayName: function(context) {
 					var mountType = context.$file.attr('data-mounttype');
-					var deleteTitle = t('files', 'Delete');
+					var type = context.$file.attr('data-type');
+					var deleteTitle = (type && type === 'file')
+						? t('files', 'Delete file')
+						: t('files', 'Delete folder')
 					if (mountType === 'external-root') {
 						deleteTitle = t('files', 'Disconnect storage');
 					} else if (mountType === 'shared-root') {

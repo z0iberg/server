@@ -33,7 +33,7 @@ use OCP\IDBConnection;
 use OCP\IUser;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\GenericEvent;
-use OC\Settings\BackgroundJobs\VerifyUserData;
+use OCA\Settings\BackgroundJobs\VerifyUserData;
 
 /**
  * Class AccountManager
@@ -330,7 +330,7 @@ class AccountManager implements IAccountManager {
 	private function parseAccountData(IUser $user, $data): Account {
 		$account = new Account($user);
 		foreach($data as $property => $accountData) {
-			$account->setProperty($property, $accountData['value'] ?? '', $accountData['scope'], $accountData['verified']);
+			$account->setProperty($property, $accountData['value'] ?? '', $accountData['scope'] ?? self::VISIBILITY_PRIVATE, $accountData['verified'] ?? self::NOT_VERIFIED);
 		}
 		return $account;
 	}

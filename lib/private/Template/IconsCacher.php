@@ -24,6 +24,7 @@ declare (strict_types = 1);
 
 namespace OC\Template;
 
+use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\Files\IAppData;
 use OCP\Files\NotFoundException;
 use OCP\Files\SimpleFS\ISimpleFolder;
@@ -46,26 +47,35 @@ class IconsCacher {
 	/** @var IURLGenerator */
 	protected $urlGenerator;
 
+	/** @var ITimeFactory */
+	protected $timeFactory;
+
 	/** @var string */
-	private $iconVarRE = '/--(icon-[a-zA-Z0-9-]+):\s?url\(["\']?([a-zA-Z0-9-_\~\/\.\?\=\:\;\+\,]+)[^;]+;/m';
+	private $iconVarRE = '/--(icon-[a-zA-Z0-9-]+):\s?url\(["\']?([a-zA-Z0-9-_\~\/\.\?\&\=\:\;\+\,]+)[^;]+;/m';
 
 	/** @var string */
 	private $fileName = 'icons-vars.css';
 
 	private $iconList = 'icons-list.template';
 
+	private $cachedCss;
+	private $cachedList;
+
 	/**
 	 * @param ILogger $logger
 	 * @param Factory $appDataFactory
 	 * @param IURLGenerator $urlGenerator
+	 * @param ITimeFactory $timeFactory
 	 * @throws \OCP\Files\NotPermittedException
 	 */
 	public function __construct(ILogger $logger,
 								Factory $appDataFactory,
-								IURLGenerator $urlGenerator) {
+								IURLGenerator $urlGenerator,
+								ITimeFactory $timeFactory) {
 		$this->logger       = $logger;
 		$this->appData      = $appDataFactory->get('css');
 		$this->urlGenerator = $urlGenerator;
+		$this->timeFactory  = $timeFactory;
 
 		try {
 			$this->folder = $this->appData->getFolder('icons');
@@ -112,7 +122,10 @@ class IconsCacher {
 		foreach ($icons as $icon => $url) {
 			$list .= "--$icon: url('$url');";
 			list($location,$color) = $this->parseUrl($url);
-			$svg = file_get_contents($location);
+			$svg = false;
+			if ($location !== '' && \file_exists($location)) {
+				$svg = \file_get_contents($location);
+			}
 			if ($svg === false) {
 				$this->logger->debug('Failed to get icon file ' . $location);
 				$data .= "--$icon: url('$url');";
@@ -127,6 +140,8 @@ class IconsCacher {
 			$cachedVarsCssFile->putContent($data);
 			$list = ":root {\n$list\n}";
 			$cachedFile->putContent($list);
+			$this->cachedList = null;
+			$this->cachedCss = null;
 		}
 
 		return preg_replace($this->iconVarRE, '', $css);
@@ -142,21 +157,20 @@ class IconsCacher {
 		$base = $this->getRoutePrefix() . '/svg/';
 		$cleanUrl = \substr($url, \strlen($base));
 		if (\strpos($url, $base . 'core') === 0) {
-			$cleanUrl = \substr($cleanUrl, \strlen('core'), \strpos($cleanUrl, '?')-\strlen('core'));
-			$parts = \explode('/', $cleanUrl);
-			$color = \array_pop($parts);
-			$cleanUrl = \implode('/', $parts);
-			$location = \OC::$SERVERROOT . '/core/img/' . $cleanUrl . '.svg';
-		} elseif (\strpos($url, $base) === 0) {
-			$cleanUrl = \substr($cleanUrl, 0, \strpos($cleanUrl, '?'));
-			$parts = \explode('/', $cleanUrl);
-			$app = \array_shift($parts);
-			$color = \array_pop($parts);
-			$cleanUrl = \implode('/', $parts);
-			$location = \OC_App::getAppPath($app) . '/img/' . $cleanUrl . '.svg';
-			if ($app === 'settings') {
-				$location = \OC::$SERVERROOT . '/settings/img/' . $cleanUrl . '.svg';
+			$cleanUrl = \substr($cleanUrl, \strlen('core'));
+			if (\preg_match('/\/([a-zA-Z0-9-_\~\/\.\=\:\;\+\,]+)\?color=([0-9a-fA-F]{3,6})/', $cleanUrl, $matches)) {
+				list(,$cleanUrl,$color) = $matches;
+				$location = \OC::$SERVERROOT . '/core/img/' . $cleanUrl . '.svg';
 			}
+		} elseif (\strpos($url, $base) === 0) {
+			if(\preg_match('/([A-z0-9\_\-]+)\/([a-zA-Z0-9-_\~\/\.\=\:\;\+\,]+)\?color=([0-9a-fA-F]{3,6})/', $cleanUrl, $matches)) {
+				list(,$app,$cleanUrl, $color) = $matches;
+				$location = \OC_App::getAppPath($app) . '/img/' . $cleanUrl . '.svg';
+				if ($app === 'settings') {
+					$location = \OC::$SERVERROOT . '/settings/img/' . $cleanUrl . '.svg';
+				}
+			}
+
 		}
 		return [
 			$location,
@@ -170,8 +184,13 @@ class IconsCacher {
 	 * @return string
 	 */
 	public function colorizeSvg($svg, $color): string {
+		if (!preg_match('/^[0-9a-f]{3,6}$/i', $color)) {
+			// Prevent not-sane colors from being written into the SVG
+			$color = '000';
+		}
+
 		// add fill (fill is not present on black elements)
-		$fillRe = '/<((circle|rect|path)((?!fill)[a-z0-9 =".\-#():;])+)\/>/mi';
+		$fillRe = '/<((circle|rect|path)((?!fill)[a-z0-9 =".\-#():;,])+)\/>/mi';
 		$svg = preg_replace($fillRe, '<$1 fill="#' . $color . '"/>', $svg);
 
 		// replace any fill or stroke colors
@@ -195,7 +214,10 @@ class IconsCacher {
 	 */
 	public function getCachedCSS() {
 		try {
-			return $this->folder->getFile($this->fileName);
+			if (!$this->cachedCss) {
+				$this->cachedCss = $this->folder->getFile($this->fileName);
+			}
+			return $this->cachedCss;
 		} catch (NotFoundException $e) {
 			return false;
 		}
@@ -207,13 +229,24 @@ class IconsCacher {
 	 */
 	public function getCachedList() {
 		try {
-			return $this->folder->getFile($this->iconList);
+			if (!$this->cachedList) {
+				$this->cachedList = $this->folder->getFile($this->iconList);
+			}
+			return $this->cachedList;
 		} catch (NotFoundException $e) {
 			return false;
 		}
 	}
 
+	/**
+	 * Add the icons cache css into the header
+	 */
 	public function injectCss() {
+		$mtime = $this->timeFactory->getTime();
+		$file = $this->getCachedList();
+		if ($file) {
+			$mtime = $file->getMTime();
+		}
 		// Only inject once
 		foreach (\OC_Util::$headers as $header) {
 			if (
@@ -223,7 +256,7 @@ class IconsCacher {
 				return;
 			}
 		}
-		$linkToCSS = $this->urlGenerator->linkToRoute('core.Css.getCss', ['appName' => 'icons', 'fileName' => $this->fileName]);
+		$linkToCSS = $this->urlGenerator->linkToRoute('core.Css.getCss', ['appName' => 'icons', 'fileName' => $this->fileName, 'v' => $mtime]);
 		\OC_Util::addHeader('link', ['rel' => 'stylesheet', 'href' => $linkToCSS], null, true);
 	}
 

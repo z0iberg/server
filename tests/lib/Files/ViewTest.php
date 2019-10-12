@@ -1962,6 +1962,9 @@ class ViewTest extends \Test\TestCase {
 		$operationArgs,
 		$path
 	) {
+		if ($operation === 'touch') {
+			$this->markTestSkipped("touch handles storage exceptions internally");
+		}
 		$view = new View('/' . $this->user . '/files/');
 
 		/** @var Temporary|\PHPUnit_Framework_MockObject_MockObject $storage */
@@ -1995,6 +1998,37 @@ class ViewTest extends \Test\TestCase {
 		}
 		$this->assertTrue($thrown, 'Exception was rethrown');
 		$this->assertNull($this->getFileLockType($view, $path), 'File got unlocked after exception');
+	}
+
+	public function testLockBasicOperationUnlocksAfterLockException() {
+		$view = new View('/' . $this->user . '/files/');
+
+		$storage = new Temporary([]);
+
+		Filesystem::mount($storage, array(), $this->user . '/');
+
+		$storage->mkdir('files');
+		$storage->mkdir('files/dir');
+		$storage->file_put_contents('files/test.txt', 'blah');
+		$storage->getScanner()->scan('files');
+
+		// get a shared lock
+		$handle = $view->fopen('test.txt', 'r');
+
+		$thrown = false;
+		try {
+			// try (and fail) to get a write lock
+			$view->unlink('test.txt');
+		} catch (\Exception $e) {
+			$thrown = true;
+			$this->assertInstanceOf(LockedException::class, $e);
+		}
+		$this->assertTrue($thrown, 'Exception was rethrown');
+
+		// clean shared lock
+		fclose($handle);
+
+		$this->assertNull($this->getFileLockType($view, 'test.txt'), 'File got unlocked');
 	}
 
 	/**

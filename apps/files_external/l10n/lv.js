@@ -6,7 +6,7 @@ OC.L10N.register(
     "System" : "Sistēma",
     "Grant access" : "Piešķirt pieeju",
     "Error configuring OAuth1" : "Konfigurēšanas kļūda OAuth1",
-    "Please provide a valid app key and secret." : "Lūdzu, norādiet derīgu programmas atslēgu un noslēpumu.",
+    "Please provide a valid app key and secret." : "Lūdzu, norādiet derīgu lietotnes atslēgu un noslēpumu.",
     "Error configuring OAuth2" : "Konfigurēšanas kļūda OAuth2",
     "Generate keys" : "Izveidot atslēgas",
     "Error generating key pair" : "Kļūda, ģenerējot atslēgu pāri",
@@ -36,7 +36,7 @@ OC.L10N.register(
     "Secret key" : "Slepenā atslēga",
     "None" : "Nav",
     "OAuth1" : "OAuth1",
-    "App key" : "Programmas atslēga",
+    "App key" : "Lietotnes atslēga",
     "OAuth2" : "OAuth2",
     "Client ID" : "Klienta ID",
     "Domain" : "Domain",
@@ -77,8 +77,6 @@ OC.L10N.register(
     "Available for" : "Pieejams",
     "Add storage" : "Pievienot krātuvi",
     "Advanced settings" : "Paplašināti iestatījumi",
-    "Allow users to mount external storage" : "Atļaut lietotājiem uzstādīt ārējās krātuves",
-    "OpenStack" : "OpenStack",
-    "No external storage configured" : "Nav konfigurēta ārējā krātuve"
+    "Allow users to mount external storage" : "Atļaut lietotājiem uzstādīt ārējās krātuves"
 },
 "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);");

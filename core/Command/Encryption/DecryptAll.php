@@ -89,7 +89,7 @@ class DecryptAll extends Command {
 	 */
 	protected function forceMaintenanceAndTrashbin() {
 		$this->wasTrashbinEnabled = $this->appManager->isEnabledForUser('files_trashbin');
-		$this->wasMaintenanceModeEnabled = $this->config->getSystemValue('maintenance', false);
+		$this->wasMaintenanceModeEnabled = $this->config->getSystemValueBool('maintenance');
 		$this->config->setSystemValue('maintenance', true);
 		$this->appManager->disableApp('files_trashbin');
 	}
@@ -129,6 +129,15 @@ class DecryptAll extends Command {
 			$output->writeln("container, do not forget to execute 'docker exec' with");
 			$output->writeln("the '-i' and '-t' options.");
 			$output->writeln('');
+			return;
+		}
+
+		$isMaintenanceModeEnabled = $this->config->getSystemValue('maintenance', false);
+		if ($isMaintenanceModeEnabled) {
+			$output->writeln("Maintenance mode must be disabled when starting decryption,");
+			$output->writeln("in order to load the relevant encryption modules correctly.");
+			$output->writeln("Your instance will automatically be put to maintenance mode");
+			$output->writeln("during the actual decryption of the files.");
 			return;
 		}
 

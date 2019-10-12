@@ -87,14 +87,16 @@ class FeedBackHandler {
 				$this->eventSource->send('success', (string)$this->l10n->t('[%d / %d]: %s', [$this->progressStateStep, $this->progressStateMax, $this->currentStep]));
 				break;
 			case '\OC\Repair::step':
+				$this->eventSource->send('success', (string)$this->l10n->t('Repair step:') . ' ' . $event->getArgument(0));
 				break;
 			case '\OC\Repair::info':
+				$this->eventSource->send('success', (string)$this->l10n->t('Repair info:') . ' ' . $event->getArgument(0));
 				break;
 			case '\OC\Repair::warning':
-				$this->eventSource->send('notice', (string)$this->l10n->t('Repair warning: ') . $event->getArgument(0));
+				$this->eventSource->send('notice', (string)$this->l10n->t('Repair warning:') . ' ' . $event->getArgument(0));
 				break;
 			case '\OC\Repair::error':
-				$this->eventSource->send('notice', (string)$this->l10n->t('Repair error: ') . $event->getArgument(0));
+				$this->eventSource->send('notice', (string)$this->l10n->t('Repair error:') . ' ' . $event->getArgument(0));
 				break;
 		}
 	}
@@ -119,8 +121,7 @@ if (\OCP\Util::needUpgrade()) {
 			$config,
 			\OC::$server->getIntegrityCodeChecker(),
 			$logger,
-			\OC::$server->query(\OC\Installer::class),
-			\OC::$server->getJobList()
+			\OC::$server->query(\OC\Installer::class)
 	);
 	$incompatibleApps = [];
 
@@ -152,9 +153,6 @@ if (\OCP\Util::needUpgrade()) {
 	});
 	$updater->listen('\OC\Updater', 'maintenanceActive', function () use ($eventSource, $l) {
 		$eventSource->send('success', (string)$l->t('Maintenance mode is kept active'));
-	});
-	$updater->listen('\OC\Updater', 'waitForCronToFinish', function () use ($eventSource, $l) {
-		$eventSource->send('success', (string)$l->t('Waiting for cron to finish (checks again in 5 seconds) …'));
 	});
 	$updater->listen('\OC\Updater', 'dbUpgradeBefore', function () use($eventSource, $l) {
 		$eventSource->send('success', (string)$l->t('Updating database schema'));
